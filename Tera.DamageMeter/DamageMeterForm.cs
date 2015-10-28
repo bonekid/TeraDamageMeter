@@ -8,6 +8,8 @@ using Tera.Game.Messages;
 using Tera.PacketLog;
 using Tera.Sniffing;
 using Message = Tera.Message;
+using System.Runtime.InteropServices;
+using System.Drawing;
 
 namespace Tera.DamageMeter
 {
@@ -179,6 +181,46 @@ namespace Tera.DamageMeter
         {
             _teraSniffer.Enabled = !_teraSniffer.Enabled;
             UpdateSettingsUi();
+        }
+
+
+        //https://msdn.microsoft.com/en-us/library/ms171548(v=vs.110).aspx
+        // Get a handle to an application window.
+        [DllImport("USER32.DLL", CharSet = CharSet.Unicode)]
+        public static extern IntPtr FindWindow(string lpClassName,
+            string lpWindowName);
+
+        // Activate an application window.
+        [DllImport("USER32.DLL")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        private void PasteButton_Click(object sender, EventArgs e)
+        {
+            IntPtr teraHandle = FindWindow(null, "TERA");
+            if (teraHandle == IntPtr.Zero)
+            {
+                MessageBox.Show("TERA is not running.");
+                return;
+            }
+
+            //stop if nothing to paste
+            if (_damageTracker == null) return;
+
+            //sets TERA as active window
+            SetForegroundWindow(teraHandle);
+            IEnumerable<PlayerInfo> playerStatsSequence = _damageTracker;
+            playerStatsSequence = playerStatsSequence.OrderByDescending(playerStats => playerStats.Dealt.Damage + playerStats.Dealt.Heal);
+
+            SendKeys.SendWait("{ENTER}");
+            System.Threading.Thread.Sleep(300);
+            foreach (var playerStats in playerStatsSequence)
+            {
+                PlayerStatsControl playerStatsControl;
+                _controls.TryGetValue(playerStats, out playerStatsControl);
+                var damageFraction = (double)playerStats.Dealt.Damage / playerStatsControl.TotalDamage;
+                var dpsResult = String.Format("|{0}| {1}{{%}} {{(}}{2}{{)}}; ", playerStats.Name, Math.Round(damageFraction * 100.0, 2), Helpers.FormatValue(playerStats.Dealt.Damage));
+                SendKeys.SendWait(dpsResult);
+            }
         }
     }
 }

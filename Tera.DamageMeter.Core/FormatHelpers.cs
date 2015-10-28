@@ -20,7 +20,7 @@ namespace Tera.DamageMeter
                 exponent++;
             }
             string suffix;
-            const string thinspace = "\u2009";
+            const string thinspace = "";// "\u2009";
             switch (exponent)
             {
                 case 0:
