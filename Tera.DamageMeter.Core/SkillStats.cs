@@ -1,3 +1,6 @@
+// Copyright (c) Gothos
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.ComponentModel;
 using Tera.DamageMeter.Annotations;
 
@@ -61,6 +64,14 @@ namespace Tera.DamageMeter
         {
             PropertyChangedEventHandler handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void Add(SkillStats other)
+        {
+            Damage += other.Damage;
+            Heal += other.Heal;
+            Hits += other.Hits;
+            Crits += other.Crits;
         }
     }
 }

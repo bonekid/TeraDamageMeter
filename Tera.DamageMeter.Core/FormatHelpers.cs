@@ -1,10 +1,46 @@
-﻿using System;
+﻿// Copyright (c) Gothos
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Globalization;
 
 namespace Tera.DamageMeter
 {
-    public class Helpers
+    public class FormatHelpers
     {
-        public static string FormatValue(long value)
+        public CultureInfo CultureInfo { get; set; }
+        public string UnitSeparator { get; set; }
+
+        public const string Thinspace = "\u2009";
+
+        public static readonly FormatHelpers Pretty = new FormatHelpers { UnitSeparator = Thinspace };
+        public static readonly FormatHelpers Invariant = new FormatHelpers { UnitSeparator = "", CultureInfo = CultureInfo.InvariantCulture };
+
+        public string FormatTimeSpan(TimeSpan? timeSpan)
+        {
+            if (timeSpan == null)
+                return null;
+
+            return FormatTimeSpan(timeSpan.Value);
+        }
+
+        public string FormatTimeSpan(TimeSpan timeSpan)
+        {
+            if (timeSpan.Hours != 0 || timeSpan.Days != 0)
+                return timeSpan.ToString("g", CultureInfo);
+            else
+                return timeSpan.ToString(@"mm\:ss");
+        }
+
+        public string FormatValue(long? value)
+        {
+            if (value == null)
+                return null;
+
+            return FormatValue(value.Value);
+        }
+
+        public string FormatValue(long value)
         {
             int exponent = 0;
             decimal decimalValue = value;
@@ -20,34 +56,38 @@ namespace Tera.DamageMeter
                 exponent++;
             }
             string suffix;
+<<<<<<< HEAD
             const string thinspace = "";// "\u2009";
+=======
+
+>>>>>>> 4e2c07c76c544e451eb0f247cfbc1bfc23b5e949
             switch (exponent)
             {
                 case 0:
                     suffix = "";
                     break;
                 case 3:
-                    suffix = thinspace + "k";
+                    suffix = UnitSeparator + "k";
                     break;
                 case 6:
-                    suffix = thinspace + "M";
+                    suffix = UnitSeparator + "M";
                     break;
                 case 9:
-                    suffix = thinspace + "B";
+                    suffix = UnitSeparator + "B";
                     break;
                 default:
-                    suffix = thinspace + "E" + thinspace + exponent;
+                    suffix = UnitSeparator + "E" + UnitSeparator + exponent;
                     break;
             }
-            return string.Format("{0}{1}", rounded, suffix);
+            return string.Format(CultureInfo, "{0}{1}", rounded, suffix);
         }
 
-        public static string FormatPercent(double fraction)
+        public string FormatPercent(double fraction)
         {
             if (double.IsNaN(fraction))
-                return "-";
+                return null;
 
-            return fraction.ToString("P1");
+            return fraction.ToString("P1", CultureInfo);
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Gothos
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NetworkSniffer;
@@ -29,6 +32,7 @@ namespace Tera.Sniffing
             filter = "tcp and (" + filter + ")";
 
             _ipSniffer = new IpSnifferWinPcap(filter);
+            _ipSniffer.Warning += OnWarning;
             var tcpSniffer = new TcpSniffer(_ipSniffer);
             tcpSniffer.NewConnection += HandleNewConnection;
         }
@@ -46,8 +50,26 @@ namespace Tera.Sniffing
             }
         }
 
+        public int BufferSize
+        {
+            get
+            {
+                return _ipSniffer.BufferSize;
+            }
+            set
+            {
+                _ipSniffer.BufferSize = value;
+            }
+        }
+
+        public IEnumerable<string> SnifferStatus()
+        {
+            return _ipSniffer.Status();
+        }
+
         public event Action<Message> MessageReceived;
         public event Action<Server> NewConnection;
+        public event Action<string> Warning;
 
         protected virtual void OnNewConnection(Server server)
         {
@@ -60,6 +82,13 @@ namespace Tera.Sniffing
             var handler = MessageReceived;
             if (handler != null) handler(message);
         }
+
+        protected virtual void OnWarning(string obj)
+        {
+            Action<string> handler = Warning;
+            if (handler != null) handler(obj);
+        }
+
 
         // called from the tcp sniffer, so it needs to lock
         void HandleNewConnection(TcpConnection connection)

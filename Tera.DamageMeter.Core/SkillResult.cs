@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Gothos
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +12,8 @@ namespace Tera.DamageMeter
 {
     public class SkillResult
     {
+        public DateTime Time { get; private set; }
+
         public int Amount { get; private set; }
         public Entity Source { get; private set; }
         public Entity Target { get; private set; }
@@ -26,6 +31,7 @@ namespace Tera.DamageMeter
 
         public SkillResult(EachSkillResultServerMessage message, EntityTracker entityRegistry, PlayerTracker playerTracker, SkillDatabase skillDatabase)
         {
+            Time = message.Time;
             Amount = message.Amount;
             IsCritical = message.IsCritical;
             IsHeal = message.IsHeal;
